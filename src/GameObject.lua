@@ -28,9 +28,16 @@ function GameObject:init(def, x, y)
     self.y = y
     self.width = def.width
     self.height = def.height
+    self.scale = def.scale or 1
+
+    self.consumable = def.consumable
+
 
     -- default empty collision callback
     self.onCollide = function() end
+
+    -- defaulty on consume callback
+    self.onConsume = function(player) end
 end
 
 function GameObject:update(dt)
@@ -39,5 +46,5 @@ end
 
 function GameObject:render(adjacentOffsetX, adjacentOffsetY)
     love.graphics.draw(gTextures[self.texture], gFrames[self.texture][self.states[self.state].frame or self.frame],
-        self.x + adjacentOffsetX, self.y + adjacentOffsetY)
+        self.x + adjacentOffsetX, self.y + adjacentOffsetY, 0, self.scale, self.scale)
 end
