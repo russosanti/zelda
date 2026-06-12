@@ -9,6 +9,10 @@
 love.graphics.setDefaultFilter('nearest', 'nearest')
 require 'src.Dependencies'
 
+if os.getenv("LOCAL_LUA_DEBUGGER_VSCODE") == "1" then
+  require("lldebugger").start()
+end
+
 local paused = false
 
 function love.load()
@@ -34,6 +38,7 @@ function love.load()
     gStateMachine:change('start')
 
     gSounds['music']:setLooping(true)
+    gSounds['music']:setVolume(0.4)
     gSounds['music']:play()
 
     love.keyboard.keysPressed = {}

@@ -173,12 +173,18 @@ function Room:update(dt)
     for i = #self.entities, 1, -1 do
         local entity = self.entities[i]
 
-        -- remove entity from the table if health is <= 0
-        if entity.health <= 0 then
-            entity.dead = true
-        elseif not entity.dead then
-            entity:processAI({room = self}, dt)
-            entity:update(dt)
+        if not entity.dead then
+            if entity.health <= 0 then
+                entity.dead = true
+
+                -- 20% chance to drop a heart when an enemy dies
+                if self.player.health < MAX_HEALTH and math.random(1) == 1 then
+                    self:dropHeart(entity.x, entity.y)
+                end
+            else
+                entity:processAI({room = self}, dt)
+                entity:update(dt)
+            end
         end
 
         -- collision between the player and entities in the room
@@ -193,12 +199,18 @@ function Room:update(dt)
         end
     end
 
-    for k, object in pairs(self.objects) do
+    for i = #self.objects, 1, -1 do
+        local object = self.objects[i]
         object:update(dt)
 
         -- trigger collision callback on object
         if self.player:collides(object) then
-            object:onCollide()
+            if object.consumable then
+                object.onConsume(self.player)
+                table.remove(self.objects, i)
+            else
+                object:onCollide()
+            end
         end
     end
 end
@@ -313,4 +325,16 @@ function Room:render()
     --     VIRTUAL_HEIGHT - TILE_SIZE - 6, TILE_SIZE * 2, TILE_SIZE * 2 + 12)
     
     -- love.graphics.setColor(255, 255, 255, 255)
+end
+
+function Room:dropHeart(x, y)
+    local heart = GameObject(GAME_OBJECT_DEFS['heart'], x, y)
+
+    heart.onConsume = function(player)
+        gSounds['heart']:play()
+        -- heal one full heart (+2)
+        player.health = math.min(MAX_HEALTH, player.health + 2)
+    end
+
+    table.insert(self.objects, heart)
 end
