@@ -178,7 +178,7 @@ function Room:update(dt)
                 entity.dead = true
 
                 -- 20% chance to drop a heart when an enemy dies
-                if self.player.health < MAX_HEALTH and math.random(1) == 1 then
+                if self.player.health < MAX_HEALTH and math.random(5) == 1 then
                     self:dropHeart(entity.x, entity.y)
                 end
             else
