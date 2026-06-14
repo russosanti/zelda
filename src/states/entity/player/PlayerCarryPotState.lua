@@ -41,6 +41,7 @@ function PlayerCarryPotState:update(dt)
 
     if love.keyboard.wasPressed('space') then
         self.entity:throwPot(self.pot, self.dungeon.currentRoom)
+        return
     end
 
     local oldX, oldY = self.entity.x, self.entity.y

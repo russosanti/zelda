@@ -30,6 +30,7 @@ function PlayerCarryPotIdleState:update(dt)
 
     if love.keyboard.wasPressed('space') then
         self.entity:throwPot(self.pot, self.dungeon.currentRoom)
+        return
     end
 
     self:trackPot()

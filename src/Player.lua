@@ -92,6 +92,11 @@ function Player:throwPot(pot, currentRoom)
     else
         pot:fire(0, POT_THROW_SPEED)
     end
+
+    -- Check to see if pot will collide with top wall, if so move the pot down so it doesn't get stuck in the wall and disappear
+    if pot.y < MAP_RENDER_OFFSET_Y + TILE_SIZE then
+        pot.y = pot.y + pot.height + 3
+    end
     
     table.insert(currentRoom.objects, pot)
     self:changeState('idle')
