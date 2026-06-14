@@ -60,14 +60,9 @@ function PlayerSwingSwordState:enter(params)
 end
 
 function PlayerSwingSwordState:update(dt)
-    
+
     -- check if hitbox collides with any entities in the scene
-    for k, entity in pairs(self.dungeon.currentRoom.entities) do
-        if entity:collides(self.swordHitbox) then
-            entity:damage(1)
-            gSounds['hit-enemy']:play()
-        end
-    end
+    self.dungeon.currentRoom:damageEntities(self.swordHitbox, 1)
 
     -- if we've fully elapsed through one cycle of animation, change back to idle state
     if self.player.currentAnimation.timesPlayed > 0 then

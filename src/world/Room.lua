@@ -176,16 +176,27 @@ function Room:generateWallsAndFloors()
 end
 
 function Room:update(dt)
-    
+
     -- don't update anything if we are sliding to another room (we have offsets)
     if self.adjacentOffsetX ~= 0 or self.adjacentOffsetY ~= 0 then return end
 
     self.player:update(dt)
+    self:updateEntities(dt)
+    self:updateObjects(dt)
+end
 
+function Room:updateEntities(dt)
     for i = #self.entities, 1, -1 do
         local entity = self.entities[i]
 
-        self.dungeon.currentRoom:damageEntities(self.swordHitbox, 1)
+        if not entity.dead then
+            if entity.health <= 0 then
+                self:killEntity(entity)
+            else
+                entity:processAI({room = self}, dt)
+                entity:update(dt)
+            end
+        end
 
         -- collision between the player and entities in the room
         if not entity.dead and self.player:collides(entity) and not self.player.invulnerable then
@@ -198,7 +209,9 @@ function Room:update(dt)
             end
         end
     end
+end
 
+function Room:updateObjects(dt)
     for i = #self.objects, 1, -1 do
         local object = self.objects[i]
         object:update(dt)
@@ -349,22 +362,32 @@ end
 
 function Room:damageEntities(hitbox, damage)
     local hit = false
+
     for _, entity in pairs(self.entities) do
         if not entity.dead and entity:collides(hitbox) then
-            gSounds['hit-enemy']:play()
-            entity:damage(damage)
+            self:damageEntity(entity, damage)
             hit = true
-
-            if entity.health <= 0 then
-                entity.dead = true
-
-                -- 20% chance to drop a heart when an enemy dies
-                if self.player.health < MAX_HEALTH and math.random(5) == 1 then
-                    self:dropHeart(entity.x, entity.y)
-                end
-            end
         end
     end
 
     return hit
+end
+
+function Room:damageEntity(entity, damage)
+    gSounds['hit-enemy']:play()
+    entity:damage(damage)
+
+    if entity.health <= 0 then
+        self:killEntity(entity)
+    end
+end
+
+function Room:killEntity(entity)
+    if not entity.dead then
+        entity.dead = true
+        -- 20% chance to drop a heart when an enemy dies
+        if self.player.health < MAX_HEALTH and math.random(5) == 1 then
+            self:dropHeart(entity.x, entity.y)
+        end
+    end
 end
