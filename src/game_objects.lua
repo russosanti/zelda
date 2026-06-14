@@ -48,6 +48,7 @@ GAME_OBJECT_DEFS = {
         defaultState = 'default',
         states = {
             ['default'] = {frame = 14}
-        }
+        },
+        maxDistance = 4 * TILE_SIZE
     }
 }

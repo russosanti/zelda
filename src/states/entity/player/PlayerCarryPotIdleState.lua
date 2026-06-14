@@ -8,10 +8,11 @@
 
 PlayerCarryPotIdleState = Class{__includes = EntityIdleState}
 
-function PlayerCarryPotIdleState:init(player)
+function PlayerCarryPotIdleState:init(player, dungeon)
     self.entity = player
     self.entity.offsetY = 5
     self.entity.offsetX = 0
+    self.dungeon = dungeon
 end
 
 function PlayerCarryPotIdleState:enter(params)
@@ -28,7 +29,7 @@ function PlayerCarryPotIdleState:update(dt)
     end
 
     if love.keyboard.wasPressed('space') then
-        -- TODO: throw pot
+        self.entity:throwPot(self.pot, self.dungeon.currentRoom)
     end
 
     self:trackPot()

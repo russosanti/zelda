@@ -40,7 +40,7 @@ function PlayerCarryPotState:update(dt)
     -- FIX: continues walking non stopping with pot, should stop and idle when no movement keys are pressed
 
     if love.keyboard.wasPressed('space') then
-        -- TODO: throw pot
+        self.entity:throwPot(self.pot, self.dungeon.currentRoom)
     end
 
     local oldX, oldY = self.entity.x, self.entity.y

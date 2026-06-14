@@ -81,3 +81,18 @@ function Player:checkDoorwayWalking(dungeon, bumped, dt)
 		end
 	end
 end
+
+function Player:throwPot(pot, currentRoom)
+    if self.direction == 'left' then
+        pot:fire(-POT_THROW_SPEED, 0)
+    elseif self.direction == 'right' then
+        pot:fire(POT_THROW_SPEED, 0)
+    elseif self.direction == 'up' then
+        pot:fire(0, -POT_THROW_SPEED)
+    else
+        pot:fire(0, POT_THROW_SPEED)
+    end
+    
+    table.insert(currentRoom.objects, pot)
+    self:changeState('idle')
+end

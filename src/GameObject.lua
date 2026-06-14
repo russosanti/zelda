@@ -32,6 +32,13 @@ function GameObject:init(def, x, y)
 
     self.consumable = def.consumable
 
+    -- projectile fields
+    self.isProjectile = false
+    self.dx = 0
+    self.dy = 0
+    self.distanceTraveled = 0
+    self.maxDistance = def.maxDistance or 0
+    self.remove = false
 
     -- default empty collision callback
     self.onCollide = function() end
@@ -41,7 +48,20 @@ function GameObject:init(def, x, y)
 end
 
 function GameObject:update(dt)
+    if self.isProjectile then
+        self.x = self.x + self.dx * dt
+        self.y = self.y + self.dy * dt
+        self.distanceTraveled = self.distanceTraveled + math.sqrt(self.dx^2 + self.dy^2) * dt
 
+        -- IF crushed on wall or traveled max distance, remove from play
+        if self.x < MAP_RENDER_OFFSET_X + TILE_SIZE or
+            self.x + self.width * self.scale > MAP_RENDER_OFFSET_X + VIRTUAL_WIDTH - TILE_SIZE * 2 or
+            self.y < MAP_RENDER_OFFSET_Y + TILE_SIZE or
+            self.y + self.height * self.scale > MAP_RENDER_OFFSET_Y + VIRTUAL_HEIGHT - TILE_SIZE or
+            self.distanceTraveled > self.maxDistance then
+            self.remove = true
+        end
+    end
 end
 
 -- AABB collision for objects
@@ -53,4 +73,14 @@ end
 function GameObject:render(adjacentOffsetX, adjacentOffsetY)
     love.graphics.draw(gTextures[self.texture], gFrames[self.texture][self.states[self.state].frame or self.frame],
         self.x + adjacentOffsetX, self.y + adjacentOffsetY, 0, self.scale, self.scale)
+end
+
+-- Fire function
+function GameObject:fire(dx, dy)
+    self.isProjectile = true
+    self.solid = false
+    self.dx = dx
+    self.dy = dy
+    self.distanceTraveled = 0
+    self.remove = false
 end
