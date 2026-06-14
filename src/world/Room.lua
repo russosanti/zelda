@@ -217,6 +217,7 @@ function Room:updateObjects(dt)
         object:update(dt)
 
         if object.isProjectile and self:damageEntities(object, 1) then
+            -- TODO: Add break effect for pot breaking
             object.remove = true
         end
 
