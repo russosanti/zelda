@@ -121,6 +121,18 @@ function Room:generateObjects()
 
     -- add to list of objects in scene (only one switch for now)
     table.insert(self.objects, switch)
+
+    for i = 1, math.random(0, 3) do
+        local pot = GameObject(
+            GAME_OBJECT_DEFS['pot'],
+            math.random(MAP_RENDER_OFFSET_X + TILE_SIZE,
+                        VIRTUAL_WIDTH - TILE_SIZE * 2 - 16),
+            math.random(MAP_RENDER_OFFSET_Y + TILE_SIZE,
+                        VIRTUAL_HEIGHT - (VIRTUAL_HEIGHT - MAP_HEIGHT * TILE_SIZE) + MAP_RENDER_OFFSET_Y - TILE_SIZE - 16)
+        )
+        -- add to list of objects
+        table.insert(self.objects, pot)
+    end
 end
 
 --[[
@@ -164,23 +176,22 @@ function Room:generateWallsAndFloors()
 end
 
 function Room:update(dt)
-    
+
     -- don't update anything if we are sliding to another room (we have offsets)
     if self.adjacentOffsetX ~= 0 or self.adjacentOffsetY ~= 0 then return end
 
     self.player:update(dt)
+    self:updateEntities(dt)
+    self:updateObjects(dt)
+end
 
+function Room:updateEntities(dt)
     for i = #self.entities, 1, -1 do
         local entity = self.entities[i]
 
         if not entity.dead then
             if entity.health <= 0 then
-                entity.dead = true
-
-                -- 20% chance to drop a heart when an enemy dies
-                if self.player.health < MAX_HEALTH and math.random(1) == 1 then
-                    self:dropHeart(entity.x, entity.y)
-                end
+                self:killEntity(entity)
             else
                 entity:processAI({room = self}, dt)
                 entity:update(dt)
@@ -198,18 +209,28 @@ function Room:update(dt)
             end
         end
     end
+end
 
+function Room:updateObjects(dt)
     for i = #self.objects, 1, -1 do
         local object = self.objects[i]
         object:update(dt)
 
-        -- trigger collision callback on object
-        if self.player:collides(object) then
-            if object.consumable then
-                object.onConsume(self.player)
-                table.remove(self.objects, i)
-            else
-                object:onCollide()
+        if object.isProjectile and self:damageEntities(object, 1) then
+            object:breaking()
+        end
+
+        if object.remove then
+            table.remove(self.objects, i)
+        else
+            -- trigger collision callback on object
+            if not object.isBreaking and self.player:collides(object) then
+                if object.consumable then
+                    object.onConsume(self.player)
+                    table.remove(self.objects, i)
+                else
+                    object:onCollide()
+                end
             end
         end
     end
@@ -245,13 +266,13 @@ function Room:render()
     -- stencil out the door arches so it looks like the player is going through
     love.graphics.stencil(function()
         
-        -- left
-        love.graphics.rectangle('fill', -TILE_SIZE - 6, MAP_RENDER_OFFSET_Y + (MAP_HEIGHT / 2) * TILE_SIZE - TILE_SIZE,
-            TILE_SIZE * 2 + 6, TILE_SIZE * 2)
+        -- left adde 1.25 to allow the user to pass with the pot on left and right animations
+        love.graphics.rectangle('fill', -TILE_SIZE - 6, MAP_RENDER_OFFSET_Y + (MAP_HEIGHT / 2) * TILE_SIZE - TILE_SIZE * 1.25,
+            TILE_SIZE * 2 + 6, TILE_SIZE * 3)
         
         -- right
         love.graphics.rectangle('fill', MAP_RENDER_OFFSET_X + (MAP_WIDTH * TILE_SIZE),
-            MAP_RENDER_OFFSET_Y + (MAP_HEIGHT / 2) * TILE_SIZE - TILE_SIZE, TILE_SIZE * 2 + 6, TILE_SIZE * 2)
+            MAP_RENDER_OFFSET_Y + (MAP_HEIGHT / 2) * TILE_SIZE - TILE_SIZE * 1.25, TILE_SIZE * 2 + 6, TILE_SIZE * 3)
         
         -- top
         love.graphics.rectangle('fill', MAP_RENDER_OFFSET_X + (MAP_WIDTH / 2) * TILE_SIZE - TILE_SIZE,
@@ -337,4 +358,36 @@ function Room:dropHeart(x, y)
     end
 
     table.insert(self.objects, heart)
+end
+
+function Room:damageEntities(hitbox, damage)
+    local hit = false
+
+    for _, entity in pairs(self.entities) do
+        if not entity.dead and entity:collides(hitbox) then
+            self:damageEntity(entity, damage)
+            hit = true
+        end
+    end
+
+    return hit
+end
+
+function Room:damageEntity(entity, damage)
+    gSounds['hit-enemy']:play()
+    entity:damage(damage)
+
+    if entity.health <= 0 then
+        self:killEntity(entity)
+    end
+end
+
+function Room:killEntity(entity)
+    if not entity.dead then
+        entity.dead = true
+        -- 20% chance to drop a heart when an enemy dies
+        if self.player.health < MAX_HEALTH and math.random(5) == 1 then
+            self:dropHeart(entity.x, entity.y)
+        end
+    end
 end

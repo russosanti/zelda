@@ -71,8 +71,8 @@ function Entity:goInvulnerable(duration)
     self.invulnerableDuration = duration
 end
 
-function Entity:changeState(name)
-    self.stateMachine:change(name)
+function Entity:changeState(name, params)
+    self.stateMachine:change(name, params)
 end
 
 function Entity:changeAnimation(name)
@@ -115,4 +115,18 @@ function Entity:render(adjacentOffsetX, adjacentOffsetY)
     self.stateMachine:render()
     love.graphics.setColor(1, 1, 1, 1)
     self.x, self.y = self.x - (adjacentOffsetX or 0), self.y - (adjacentOffsetY or 0)
+end
+
+function Entity:facingHitbox(size)
+    -- Hitbox(x, y, width, height) to check for collision with pot
+
+    if self.direction == 'left' then
+        return Hitbox(self.x - size, self.y, size, self.height)
+    elseif self.direction == 'right' then
+        return Hitbox(self.x + self.width, self.y, size, self.height)
+    elseif self.direction == 'up' then
+        return Hitbox(self.x, self.y - size, self.width, size)
+    else
+        return Hitbox(self.x, self.y + self.height, self.width, size)
+    end
 end
