@@ -32,7 +32,7 @@ function PlayState:init()
     
     self.player.stateMachine = StateMachine {
         ['walk'] = function() return PlayerWalkState(self.player, self.dungeon) end,
-        ['idle'] = function() return PlayerIdleState(self.player) end,
+        ['idle'] = function() return PlayerIdleState(self.player, self.dungeon) end,
         ['swing-sword'] = function() return PlayerSwingSwordState(self.player, self.dungeon) end,
         ['lift-pot'] = function() return PlayerLiftPotState(self.player, self.dungeon) end,
         ['carry-pot'] = function() return PlayerCarryPotState(self.player, self.dungeon) end,
@@ -82,6 +82,15 @@ function PlayState:render()
         healthLeft = healthLeft - 2
     end
 
+    -- render boomerang icon
+    if self.player.inventory.boomerang then
+        local scale = 16 / gTextures['boomerang']:getWidth()
+
+        love.graphics.setColor(1, 1, 1, self.player.inventory.boomerang.active and 0.35 or 1)
+        love.graphics.draw(gTextures['boomerang'], 56, 3, 0, scale, scale)
+        love.graphics.setColor(1, 1, 1, 1)
+    end
+
     -- render grid of dungeon (8px tiles), top right of screen, if flag enabled
     if renderMap then
         love.graphics.setColor(0, 0, 0, 0.5)
@@ -89,10 +98,14 @@ function PlayState:render()
         love.graphics.setColor(1, 1, 1, 0.5)
         for y = 1, #self.dungeon.rooms do
             for x = 1, #self.dungeon.rooms[y] do
-                if self.dungeon.rooms[y][x] then
+                local room = self.dungeon.rooms[y][x]
+                if room then
                     if self.dungeon.currentRoom.x == x and
                        self.dungeon.currentRoom.y == y then
                         love.graphics.setColor(1, 0, 0, 0.5)
+                    -- render treasureRoom
+                    elseif self.dungeon.treasureRoom == room and not room.boomerangChestOpened then
+                        love.graphics.setColor(1, 1, 0, 0.5)
                     else
                         love.graphics.setColor(0, 1, 0, 0.5)
                     end

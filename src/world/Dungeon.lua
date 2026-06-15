@@ -84,6 +84,18 @@ function Dungeon:beginShifting(shiftX, shiftY)
     self.shifting = true
     self.nextRoom = nextRoom
 
+    -- if boomerang is active, catch it and delete it from room
+    if self.player.inventory.boomerang and self.player.inventory.boomerang.active then
+        self.player.inventory.boomerang:catch()
+
+        for i = #self.currentRoom.objects, 1, -1 do
+        if self.currentRoom.objects[i] == boomerang then
+            table.remove(self.currentRoom.objects, i)
+            break
+        end
+    end
+    end
+
 
     -- start all doors in next room as open until we get in
     for k, doorway in pairs(self.nextRoom.doorways) do

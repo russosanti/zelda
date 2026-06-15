@@ -175,6 +175,19 @@ function Room:generateWallsAndFloors()
     end
 end
 
+function Room:spawnBoomerangChest(x, y)
+    local chest = GameObject(
+        GAME_OBJECT_DEFS['chest'],
+        x or VIRTUAL_WIDTH / 2 - TILE_SIZE / 2,
+        y or VIRTUAL_HEIGHT / 2 - TILE_SIZE / 2
+    )
+
+    self.hasBoomerangChest = true
+    self.boomerangChestOpened = false
+
+    table.insert(self.objects, chest)
+end
+
 function Room:update(dt)
 
     -- don't update anything if we are sliding to another room (we have offsets)
@@ -216,8 +229,8 @@ function Room:updateObjects(dt)
         local object = self.objects[i]
         object:update(dt)
 
-        if object.isProjectile and self:damageEntities(object, 1) then
-            object:breaking()
+        if object.isProjectile and (object.canDamage == nil or object.canDamage) and self:damageEntities(object, 1) then
+            object:onProjectileHitEntity()
         end
 
         if object.remove then
@@ -390,4 +403,24 @@ function Room:killEntity(entity)
             self:dropHeart(entity.x, entity.y)
         end
     end
+end
+
+function Room:openChestInFrontOfPlayer()
+    local chestZone = self.player:facingHitbox(6)
+
+    for _, object in pairs(self.objects) do
+        if object.type == 'chest' and object.state == 'closed' and object:collides(chestZone) then
+            object.state = 'open'
+            self.boomerangChestOpened = true
+
+            if not self.player.inventory.boomerang then
+                self.player.inventory.boomerang = Boomerang(self.player)
+            end
+
+            gSounds['heart']:play()
+            return true
+        end
+    end
+
+    return false
 end

@@ -10,6 +10,10 @@ Player = Class{__includes = Entity}
 
 function Player:init(def)
     Entity.init(self, def)
+
+    self.inventory = {
+        boomerang = nil
+    }
 end
 
 function Player:update(dt)
@@ -100,4 +104,17 @@ function Player:throwPot(pot, currentRoom)
     
     table.insert(currentRoom.objects, pot)
     self:changeState('idle')
+end
+
+function Player:canThrowBoomerang()
+    return self.inventory.boomerang and not self.inventory.boomerang.active
+end
+
+function Player:throwBoomerang(currentRoom)
+    if self:canThrowBoomerang() then
+        self.inventory.boomerang:fire(self)
+        table.insert(currentRoom.objects, self.inventory.boomerang)
+        return true
+    end
+    return false
 end

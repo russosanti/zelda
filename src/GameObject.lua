@@ -58,19 +58,26 @@ function GameObject:update(dt)
     end
 
     if self.isProjectile then
-        self.x = self.x + self.dx * dt
-        self.y = self.y + self.dy * dt
-        self.distanceTraveled = self.distanceTraveled + math.sqrt(self.dx^2 + self.dy^2) * dt
-
-        -- IF crushed on wall or traveled max distance, remove from play
-        if self.x < MAP_RENDER_OFFSET_X + TILE_SIZE or
-            self.x + self.width * self.scale > MAP_RENDER_OFFSET_X + VIRTUAL_WIDTH - TILE_SIZE * 2 or
-            self.y < MAP_RENDER_OFFSET_Y + TILE_SIZE or
-            self.y + self.height * self.scale > MAP_RENDER_OFFSET_Y + VIRTUAL_HEIGHT - TILE_SIZE or
-            self.distanceTraveled > self.maxDistance then
-            self:breaking()
-        end
+        self:updateProjectile(dt)
     end
+end
+
+function GameObject:updateProjectile(dt)
+    self.x = self.x + self.dx * dt
+    self.y = self.y + self.dy * dt
+    self.distanceTraveled = self.distanceTraveled + math.sqrt(self.dx^2 + self.dy^2) * dt
+
+    -- IF crushed on wall or traveled max distance, remove from play
+    if self:hittedWall() or self.distanceTraveled > self.maxDistance then
+        self:onProjectileFinished()
+    end
+end
+
+function GameObject:hittedWall()
+    return self.x < MAP_RENDER_OFFSET_X + TILE_SIZE or
+        self.x + self.width * self.scale > MAP_RENDER_OFFSET_X + VIRTUAL_WIDTH - TILE_SIZE * 2 or
+        self.y < MAP_RENDER_OFFSET_Y + TILE_SIZE or
+        self.y + self.height * self.scale > MAP_RENDER_OFFSET_Y + VIRTUAL_HEIGHT - TILE_SIZE
 end
 
 -- AABB collision for objects
@@ -93,6 +100,7 @@ end
 -- Fire function
 function GameObject:fire(dx, dy)
     self.isProjectile = true
+    self.isBreaking = false
     self.solid = false
     self.dx = dx
     self.dy = dy
@@ -121,4 +129,12 @@ function GameObject:breaking()
             self.remove = true
         end)
     end
+end
+
+function GameObject:onProjectileFinished()
+    self:breaking()
+end
+
+function GameObject:onProjectileHitEntity()
+    self:breaking()
 end
