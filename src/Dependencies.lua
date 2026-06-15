@@ -48,7 +48,8 @@ gTextures = {
     ['character-pot-walk'] = love.graphics.newImage('graphics/character_pot_walk.png'),
     ['hearts'] = love.graphics.newImage('graphics/hearts.png'),
     ['switches'] = love.graphics.newImage('graphics/switches.png'),
-    ['entities'] = love.graphics.newImage('graphics/entities.png')
+    ['entities'] = love.graphics.newImage('graphics/entities.png'),
+    ['particle'] = love.graphics.newImage('graphics/particle.png')
 }
 
 gFrames = {

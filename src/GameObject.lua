@@ -38,6 +38,7 @@ function GameObject:init(def, x, y)
     self.dy = 0
     self.distanceTraveled = 0
     self.maxDistance = def.maxDistance or 0
+    self.isBreaking = false
     self.remove = false
 
     -- default empty collision callback
@@ -48,6 +49,14 @@ function GameObject:init(def, x, y)
 end
 
 function GameObject:update(dt)
+    if self.isBreaking then
+        -- For destroying pots particle effect
+        if self.psystem then
+            self.psystem:update(dt)
+        end
+        return
+    end
+
     if self.isProjectile then
         self.x = self.x + self.dx * dt
         self.y = self.y + self.dy * dt
@@ -59,7 +68,7 @@ function GameObject:update(dt)
             self.y < MAP_RENDER_OFFSET_Y + TILE_SIZE or
             self.y + self.height * self.scale > MAP_RENDER_OFFSET_Y + VIRTUAL_HEIGHT - TILE_SIZE or
             self.distanceTraveled > self.maxDistance then
-            self.remove = true
+            self:breaking()
         end
     end
 end
@@ -71,6 +80,12 @@ function GameObject:collides(target)
 end
 
 function GameObject:render(adjacentOffsetX, adjacentOffsetY)
+    if self.isBreaking then
+        love.graphics.draw(self.psystem,
+            self.x + adjacentOffsetX + self.width / 2,
+            self.y + adjacentOffsetY + self.height / 2)
+        return
+    end
     love.graphics.draw(gTextures[self.texture], gFrames[self.texture][self.states[self.state].frame or self.frame],
         self.x + adjacentOffsetX, self.y + adjacentOffsetY, 0, self.scale, self.scale)
 end
@@ -83,4 +98,27 @@ function GameObject:fire(dx, dy)
     self.dy = dy
     self.distanceTraveled = 0
     self.remove = false
+end
+
+function GameObject:breaking()
+    if not self.isBreaking then
+        self.isBreaking = true
+        self.isProjectile = false
+        self.solid = false
+        self.dx = 0
+        self.dy = 0
+    
+        self.psystem = love.graphics.newParticleSystem(gTextures['particle'], 200)
+        self.psystem:setParticleLifetime(0.4, 1.5)
+        self.psystem:setSizes(0.45, 0.2)
+        self.psystem:setSpeed(8, 28)
+        self.psystem:setLinearAcceleration(-8, -12, 8, 12)
+        self.psystem:setEmissionArea('uniform', 8, 8)
+        self.psystem:setColors(1, 1, 1, 0.9, 1, 1, 1, 0)
+        self.psystem:emit(80)
+
+        Timer.after(1.5, function()
+            self.remove = true
+        end)
+    end
 end

@@ -217,15 +217,14 @@ function Room:updateObjects(dt)
         object:update(dt)
 
         if object.isProjectile and self:damageEntities(object, 1) then
-            -- TODO: Add break effect for pot breaking
-            object.remove = true
+            object:breaking()
         end
 
         if object.remove then
             table.remove(self.objects, i)
         else
             -- trigger collision callback on object
-            if self.player:collides(object) then
+            if not object.isBreaking and self.player:collides(object) then
                 if object.consumable then
                     object.onConsume(self.player)
                     table.remove(self.objects, i)
