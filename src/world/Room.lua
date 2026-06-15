@@ -175,11 +175,11 @@ function Room:generateWallsAndFloors()
     end
 end
 
-function Room:spawnBoomerangChest()
+function Room:spawnBoomerangChest(x, y)
     local chest = GameObject(
         GAME_OBJECT_DEFS['chest'],
-        VIRTUAL_WIDTH / 2 - TILE_SIZE / 2,
-        VIRTUAL_HEIGHT / 2 - TILE_SIZE / 2
+        x or VIRTUAL_WIDTH / 2 - TILE_SIZE / 2,
+        y or VIRTUAL_HEIGHT / 2 - TILE_SIZE / 2
     )
 
     self.hasBoomerangChest = true

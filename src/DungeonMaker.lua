@@ -179,7 +179,9 @@ function DungeonMaker.generate(player, maxRooms)
             rooms[cy][cx] = Room(player, cx, cy)
             numRooms = numRooms + 1
             rooms[cy][cx].order = numRooms
-            table.insert(treasureCandidates, rooms[cy][cx])
+            if not (cx == startX and cy == startY) then 
+                table.insert(treasureCandidates, rooms[cy][cx])
+            end
         end
 
         visited[cx .. ',' .. cy] = true  -- ensure this room isn't enqueued again
@@ -234,10 +236,13 @@ function DungeonMaker.generate(player, maxRooms)
     local treasureRoom = nil
     if #treasureCandidates > 0 then
         treasureRoom = treasureCandidates[math.random(#treasureCandidates)]
+        treasureRoom:spawnBoomerangChest()
     else
         treasureRoom = rooms[startY][startX]
+        -- to avoid player getting trapped in chest, we move it if it is starting room
+        treasureRoom:spawnBoomerangChest(MAP_RENDER_OFFSET_X + TILE_SIZE * 3,
+                MAP_RENDER_OFFSET_Y + TILE_SIZE * 3)
     end
-    treasureRoom:spawnBoomerangChest()
     local dungeon = Dungeon(player, rooms, startX, startY)
     dungeon.treasureRoom = treasureRoom
 
