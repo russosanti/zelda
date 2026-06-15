@@ -50,5 +50,27 @@ GAME_OBJECT_DEFS = {
             ['default'] = {frame = 14}
         },
         maxDistance = 4 * TILE_SIZE
+    },
+    ['boomerang'] = {
+        type = 'boomerang',
+        texture = 'boomerang',
+        width = 16,
+        height = 8,
+        solid = false,
+        maxDistance = 4 * TILE_SIZE,
+        scale = 16 / 4725
+    },
+    ['chest'] = {
+        type = 'chest',
+        texture = 'tiles',
+        frame = 167,
+        width = 16,
+        height = 16,
+        solid = true,
+        defaultState = 'closed',
+        states = {
+            ['closed'] = {frame = 167},
+            ['open'] = {frame = 128}
+        }
     }
 }

@@ -39,7 +39,14 @@ function PlayerWalkState:update(dt)
     end
 
     if love.keyboard.wasPressed('f') then
+        if self.dungeon.currentRoom:openChestInFrontOfPlayer() then
+            return
+        end
         self.entity:changeState('lift-pot')
+    end
+
+    if love.keyboard.wasPressed('e') then
+        self.entity:throwBoomerang(self.dungeon.currentRoom)
     end
 
     local oldX, oldY = self.entity.x, self.entity.y

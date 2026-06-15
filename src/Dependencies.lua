@@ -39,6 +39,8 @@ require 'src.states.game.GameOverState'
 require 'src.states.game.PlayState'
 require 'src.states.game.StartState'
 
+require 'src.objects.Boomerang'
+
 gTextures = {
     ['tiles'] = love.graphics.newImage('graphics/tilesheet.png'),
     ['background'] = love.graphics.newImage('graphics/background.png'),
@@ -49,7 +51,8 @@ gTextures = {
     ['hearts'] = love.graphics.newImage('graphics/hearts.png'),
     ['switches'] = love.graphics.newImage('graphics/switches.png'),
     ['entities'] = love.graphics.newImage('graphics/entities.png'),
-    ['particle'] = love.graphics.newImage('graphics/particle.png')
+    ['particle'] = love.graphics.newImage('graphics/particle.png'),
+    ['boomerang'] = love.graphics.newImage('graphics/boomerang.png')
 }
 
 gFrames = {
@@ -60,7 +63,7 @@ gFrames = {
     ['character-pot-walk'] = GenerateQuads(gTextures['character-pot-walk'], 16, 32),
     ['entities'] = GenerateQuads(gTextures['entities'], 16, 16),
     ['hearts'] = GenerateQuads(gTextures['hearts'], 16, 16),
-    ['switches'] = GenerateQuads(gTextures['switches'], 16, 18)
+    ['switches'] = GenerateQuads(gTextures['switches'], 16, 18),
 }
 
 gFonts = {
