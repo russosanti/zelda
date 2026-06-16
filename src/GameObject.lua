@@ -75,9 +75,9 @@ end
 
 function GameObject:hittedWall()
     return self.x < MAP_RENDER_OFFSET_X + TILE_SIZE or
-        self.x + self.width * self.scale > MAP_RENDER_OFFSET_X + VIRTUAL_WIDTH - TILE_SIZE * 2 or
+        self.x + self.width > MAP_RENDER_OFFSET_X + (MAP_WIDTH * TILE_SIZE) or
         self.y < MAP_RENDER_OFFSET_Y + TILE_SIZE or
-        self.y + self.height * self.scale > MAP_RENDER_OFFSET_Y + VIRTUAL_HEIGHT - TILE_SIZE
+        self.y + self.height > MAP_RENDER_OFFSET_Y + (MAP_HEIGHT * TILE_SIZE) - TILE_SIZE
 end
 
 -- AABB collision for objects

@@ -21,6 +21,7 @@ function PlayerLiftPotState:enter(params)
     -- if no pot collided
     if not self.pot then
         self.entity:changeState('idle')
+        return
     end
 
     -- delete pot from room as it is now being carried by player
